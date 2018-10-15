@@ -80,6 +80,30 @@ A command may look like
 `% dylibbundler -od -b -x ./HelloWorld.app/Contents/MacOS/helloworld -d ./HelloWorld.app/Contents/libs/`
 
 
+
+
+NOTICE FROM A BLOG POST : 
+This is absolutely one of pain when we make addon for OSX with dylib.
+
+For standalone app package, we need to copy dylib and use install_name_tool.
+(following is how oF manage libfmod.dylib in Xcode project ->Run Script phase)
+
+rsync -aved "$OF_PATH/libs/fmodex/lib/osx/libfmodex.dylib" "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/Frameworks/";
+install_name_tool -change @executable_path/libfmodex.dylib @executable_path/../Frameworks/libfmodex.dylib "$TARGET_BUILD_DIR/$PRODUCT_NAME.app/Contents/MacOS/$PRODUCT_NAME";
+Another option is this simple but super cool tool dylibbundler 3
+dylibbundler automatically resolves shared lib dependency and copy dylib to inside of .app package. I tested and works amazing.
+
+Here is sample command
+
+$ cd yourCoolProject/bin
+$ dylibbundler -od -b -x ./yourCoolProject.app/Contents/MacOS/yourCoolProject -d ./yourCoolProject.app/Contents/libs
+You will be asked where is libfmodex.dylib but we can simply pass relative path like below.
+
+'$ ./yourCoolProject.app/Contents/Frameworks'
+*Of course please install dylibbunder before execute command above.
+
+
+
 If you want to create a universal binary by merging toghether two builds from PPC and Intel machines, you can ease it up by putting the ppc and intel libs in different directories, then to create the universal binary you only have to lipo the executable.
 <code>
 <pre>
